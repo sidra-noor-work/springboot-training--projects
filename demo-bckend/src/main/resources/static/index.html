@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        button {
+            margin-left: 5px;
+        }
+
+        input {
+            padding: 5px;
+        }
+    </style>
+
+    <script>
+        async function loadItems() {
+            const res = await fetch("/api/todos");
+            const items = await res.json();
+            const list = document.getElementById("item-list");
+            list.innerHTML = "";
+
+            items.forEach(item => {
+                const li = document.createElement("li");
+
+                const span = document.createElement("span");
+                span.textContent = item.text;
+
+                const editBtn = document.createElement("button");
+                editBtn.textContent = "✏️";
+                editBtn.onclick = () => {
+                    const newText = prompt("Edit task:", item.text);
+                    if (newText !== null) {
+                        updateItem(item.id, newText);
+                    }
+                };
+
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "🗑️";
+                delBtn.onclick = () => deleteItem(item.id);
+
+                li.appendChild(span);
+                li.appendChild(editBtn);
+                li.appendChild(delBtn);
+                list.appendChild(li);
+            });
+        }
+
+        async function addItem() {
+            const input = document.getElementById("new-item");
+            const text = input.value.trim();
+            if (!text) return;
+
+            await fetch("/api/todos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text })
+            });
+
+            input.value = "";
+            loadItems();
+        }
+
+        async function deleteItem(id) {
+            await fetch(`/api/todos/${id}`, {
+                method: "DELETE"
+            });
+            loadItems();
+        }
+
+        async function updateItem(id, newText) {
+            await fetch(`/api/todos/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: newText })
+            });
+            loadItems();
+        }
+
+        window.onload = loadItems;
+    </script>
+</head>
+<body>
+<h2>📝 To-Do List</h2>
+<input type="text" id="new-item" placeholder="New task..." />
+<button onclick="addItem()">Add</button>
+
+<ul id="item-list">
+    <li>Loading...</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>To-Do List</title>
+    <style>
+        li { margin: 5px 0; }
+        button { margin-left: 10px; }
+    </style>
+    <script>
+        async function loadItems() {
+            const res = await fetch("/api/todos");
+            const data = await res.json();
+            const list = document.getElementById("item-list");
+            list.innerHTML = "";
+
+            data.forEach(item => {
+                const li = document.createElement("li");
+
+                const span = document.createElement("span");
+                span.textContent = item.text;
+
+                const editBtn = document.createElement("button");
+                editBtn.textContent = "EDIT";
+                editBtn.onclick = () => editItem(item.id, item.text);
+
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "DELETE";
+                delBtn.onclick = () => deleteItem(item.id);
+
+                li.appendChild(span);
+                li.appendChild(editBtn);
+                li.appendChild(delBtn);
+                list.appendChild(li);
+            });
+        }
+
+        async function addItem() {
+            const input = document.getElementById("new-item");
+            const text = input.value.trim();
+            if (!text) return;
+
+            await fetch("/api/todos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text })
+            });
+
+            input.value = "";
+            loadItems();
+        }
+
+        async function deleteItem(id) {
+            await fetch(`/api/todos/${id}`, { method: "DELETE" });
+            loadItems();
+        }
+
+        async function editItem(id, oldText) {
+            const newText = prompt("Edit task:", oldText);
+            if (newText && newText.trim()) {
+                await fetch(`/api/todos/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: newText.trim() })
+                });
+                loadItems();
+            }
+        }
+
+        window.onload = loadItems;
+    </script>
+</head>
+<body>
+<h2> To-Do List</h2>
+
+<input type="text" id="new-item" placeholder="New task..." />
+<button onclick="addItem()">Add</button>
+
+<ul id="item-list">
+    <li>Loading...</li>
+</ul>
+</body>
+</html>
