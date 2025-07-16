@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-0.0.1
+      author: news team
+      changes:
+        - createTable:
+            tableName: news
+            columns:
+              - column:
+                  name: news_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+              - column:
+                  name: details
+                  type: varchar(1000)
+              - column:
+                  name: reported_by
+                  type: varchar(255)
+              - column:
+                  name: reported_at
+                  type: datetime
+        - addPrimaryKey:
+            tableName: news
+            columnNames: news_id
+            constraintName: news_pk
+
+  - changeSet:
+      id: data-0.0.1
+      author: news team
+      changes:
+        - insert:
+            tableName: news
+            columns:
+              - column:
+                  name: news_id
+                  valueNumeric: 123
+              - column:
+                  name: title
+                  value: "title 123"
+              - column:
+                  name: details
+                  value: "details 123"
+              - column:
+                  name: reported_by
+                  value: "reporter 123"
+              - column:
+                  name: reported_at
+                  valueDate: "2000-01-01T12:00:00"

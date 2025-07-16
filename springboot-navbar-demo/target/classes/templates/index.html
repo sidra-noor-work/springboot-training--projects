@@ -5,15 +5,30 @@
     <style>
         li { margin: 5px 0; }
         button { margin-left: 10px; }
+        #pagination button {
+            margin: 0 2px;
+        }
     </style>
     <script>
-        async function loadItems() {
-            const res = await fetch("/api/todos");
+        let currentPage = 0;
+        const pageSize = 6;
+
+        async function loadItems(page = 0) {
+            currentPage = page;
+            const res = await fetch(`/api/todos`);
             const data = await res.json();
             const list = document.getElementById("item-list");
-            list.innerHTML = "";
+            const pagination = document.getElementById("pagination");
 
-            data.forEach(item => {
+            list.innerHTML = "";
+            pagination.innerHTML = "";
+
+            const totalPages = Math.ceil(data.length / pageSize);
+            const start = page * pageSize;
+            const end = start + pageSize;
+            const pageItems = data.slice(start, end);
+
+            pageItems.forEach(item => {
                 const li = document.createElement("li");
 
                 const span = document.createElement("span");
@@ -32,6 +47,15 @@
                 li.appendChild(delBtn);
                 list.appendChild(li);
             });
+
+            // Pagination buttons
+            for (let i = 0; i < totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i + 1;
+                if (i === currentPage) btn.disabled = true;
+                btn.onclick = () => loadItems(i);
+                pagination.appendChild(btn);
+            }
         }
 
         async function addItem() {
@@ -46,12 +70,12 @@
             });
 
             input.value = "";
-            loadItems();
+            loadItems(currentPage); // Reload current page
         }
 
         async function deleteItem(id) {
             await fetch(`/api/todos/${id}`, { method: "DELETE" });
-            loadItems();
+            loadItems(currentPage);
         }
 
         async function editItem(id, oldText) {
@@ -62,21 +86,23 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ text: newText.trim() })
                 });
-                loadItems();
+                loadItems(currentPage);
             }
         }
 
-        window.onload = loadItems;
+        window.onload = () => loadItems(0);
     </script>
 </head>
 <body>
-<h2> To-Do List</h2>
+<h2>To-Do List</h2>
 
 <input type="text" id="new-item" placeholder="New task..." />
-<button onclick="addItem()">Add</button>
+<button onclick="addItem()">Add Blog</button>
 
 <ul id="item-list">
     <li>Loading...</li>
 </ul>
+
+<div id="pagination"></div>
 </body>
 </html>
