@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: Blog API
+  version: 1.0.0
+  description: A simple Spring Boot blog API with word count and welcome message.
+
+servers:
+  - url: http://localhost:8080
+    description: Local Spring Boot Server
+
+paths:
+  /blog/welcome:
+    get:
+      summary: Get welcome message
+      description: Returns a static welcome message.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Welcome to the Blog!
+
+  /blog/count:
+    post:
+      summary: Count words in blog content
+      description: Returns the number of words in a plain text string.
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: Spring Boot makes Java fun and productive.
+      responses:
+        '200':
+          description: Word count result
+          content:
+            text/plain:
+              schema:
+                type: integer
+                example: 7
