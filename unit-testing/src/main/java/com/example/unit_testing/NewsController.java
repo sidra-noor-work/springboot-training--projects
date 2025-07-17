@@ -1,8 +1,6 @@
 package com.example.unit_testing;
 
-
-
-
+import com.example.unit_testing.exception.NewsNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +17,7 @@ public class NewsController {
             News news = new News(123, "title 123", "details 123", "reporter 123", LocalDateTime.now());
             return ResponseEntity.ok(news);
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NewsNotFoundException(id); 
         }
     }
 
