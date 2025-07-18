@@ -18,7 +18,7 @@ public class BlogController {
         return "redirect:/login";
     }
 
-    @PostMapping("/create")
+    @GetMapping("/create")
     public String showBlogs(Model model) {
         model.addAttribute("blog", new Blog());
         model.addAttribute("blogs", blogRepository.findAll());
