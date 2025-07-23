@@ -22,7 +22,7 @@ public class BlogController {
     public String showBlogs(Model model) {
         model.addAttribute("blog", new Blog());
         model.addAttribute("blogs", blogRepository.findAll());
-        return "form"; // must match form.html
+        return "form";
     }
 
 
@@ -37,10 +37,7 @@ public class BlogController {
     }
 
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+
 }
 
 
