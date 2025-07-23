@@ -7,6 +7,14 @@
 <body>
 <h1>Blog Form</h1>
 
+
+<form th:action="@{/logout}" method="post" style="text-align: right; margin-bottom: 20px;">
+    <button type="submit" style="background-color: red; color: white; border: none; padding: 8px 16px; cursor: pointer;">
+        Logout
+    </button>
+</form>
+
+
 <form th:action="@{/save}" method="POST" th:object="${blog}">
     <input type="hidden" th:field="*{id}" />
 
