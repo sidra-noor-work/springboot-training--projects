@@ -10,7 +10,12 @@
 <div th:if="${param.logout}" style="color: green;">
     You have been logged out.
 </div>
-
+<a href="/oauth2/authorization/github">
+    <button type="button" style="background-color: black; color: white;">
+        Sign in with GitHub
+    </button>
+</a>
+<div th:if="${error}" th:text="${error}" style="color:red;"></div>
 <form th:action="@{/login}" method="post">
     <label>Username:</label>
     <input type="text" name="username" required /><br/><br/>

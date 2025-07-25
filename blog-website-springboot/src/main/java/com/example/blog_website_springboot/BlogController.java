@@ -1,5 +1,12 @@
 package com.example.blog_website_springboot;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -9,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 @Controller
 public class BlogController {
 
@@ -34,7 +43,12 @@ public class BlogController {
     }
 
     @GetMapping("/create")
-    public String showBlogs(Model model) {
+    public String showBlogs(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("blog", new Blog());
         model.addAttribute("blogs", blogRepository.findAll());
         return "form";
@@ -44,16 +58,26 @@ public class BlogController {
     public String loginPage() {
         return "login";
     }
+
     @GetMapping("/signup")
     public String signupForm(Model model) {
         model.addAttribute("user", new AppUser());
         return "signup";
     }
+
     @PostMapping("/signup")
-    public String signup(@ModelAttribute("user") AppUser user) {
+    public String signup(@ModelAttribute("user") AppUser user, RedirectAttributes redirectAttributes) {
         boolean registered = userService.register(user);
-        return registered ? "redirect:/login" : "redirect:/signup?error";
+
+        if (!registered) {
+            redirectAttributes.addFlashAttribute("error", "User already exists!");
+            return "redirect:/login";
+        }
+
+        return "redirect:/login";
     }
+
+
     @PostMapping("/save")
     public String saveBlog(@ModelAttribute Blog blog, Model model) {
         blogRepository.save(blog);
@@ -63,23 +87,57 @@ public class BlogController {
 
         return "form";
     }
+    @GetMapping("/edit/{id}")
+    public String editBlog(@PathVariable Long id, Model model) {
+        Blog blog = blogRepository.findById(id).orElseThrow();
+        model.addAttribute("blog", blog);
+        model.addAttribute("blogs", blogRepository.findAll());
+        return "form";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteBlog(@PathVariable Long id) {
+        blogRepository.deleteById(id);
+        return "form";
+    }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username,
-                        @RequestParam String password,
-                        HttpServletResponse response,
-                        Model model) {
-        String token = userService.authenticate(username, password);
-        if (token != null) {
-            System.out.println("SESSION TOKEN (JWT): " + token);
-            response.setHeader("Authorization", "Bearer " + token);
+    public String login(@ModelAttribute AppUser request, HttpServletResponse response, Model model) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+
+            AppUser dummyUser = new AppUser();
+            dummyUser.setUsername(userDetails.getUsername());
+            dummyUser.setRole(userDetails.getAuthorities().iterator().next().getAuthority());
+
+
+            String token = jwtUtil.generateToken(dummyUser);
+
+            Cookie cookie = new Cookie("jwt", token);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 2); // 2 minutes (optional)
+            response.addCookie(cookie);
+
+
             return "redirect:/create";
-        } else {
+
+        } catch (Exception e) {
             model.addAttribute("error", "Invalid username or password");
+            System.out.println("error Invalid username or password");
             return "login";
         }
     }
 
 }
+
+
+
+
 
 

@@ -7,14 +7,14 @@
 <body>
 <h1>Blog Form</h1>
 
-
+<!-- Logout Button -->
 <form th:action="@{/logout}" method="post" style="text-align: right; margin-bottom: 20px;">
     <button type="submit" style="background-color: red; color: white; border: none; padding: 8px 16px; cursor: pointer;">
         Logout
     </button>
 </form>
 
-
+<!-- Blog Creation Form -->
 <form th:action="@{/save}" method="POST" th:object="${blog}">
     <input type="hidden" th:field="*{id}" />
 
@@ -27,11 +27,24 @@
     <button type="submit">Submit</button>
 </form>
 
+<!-- Blog Listing -->
 <h2>All Blogs</h2>
 <ul>
     <li th:each="b : ${blogs}">
         <strong th:text="${b.title}">Title</strong> -
         <span th:text="${b.content}">Content</span>
+
+        <!-- Edit Button -->
+        <form th:action="@{'/edit/' + ${b.id}}" method="get" style="display: inline;">
+            <button type="submit">Edit</button>
+        </form>
+
+        <!-- Delete Button -->
+        <form th:action="@{'/delete/' + ${b.id}}" method="post" style="display: inline;"
+              onsubmit="return confirm('Are you sure you want to delete this blog?');">
+            <input type="hidden" name="_method" value="delete" />
+            <button type="submit" style="color: red;">Delete</button>
+        </form>
     </li>
 </ul>
 

@@ -1,13 +1,10 @@
 package com.example.blog_website_springboot;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
@@ -33,22 +30,50 @@ public class UserService implements UserDetailsService {
     }
 
     public String authenticate(String username, String rawPassword) {
-        AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        AppUser user;
+        try {
+            user = findByUsername(username);
+        } catch (UsernameNotFoundException e) {
+            return null;
+        }
+
         if (passwordEncoder.matches(rawPassword, user.getPassword())) {
             return jwtUtil.generateToken(user);
         }
         return null;
     }
 
+    public AppUser findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+
+    public void registerOAuthUserIfNeeded(String username) {
+        if (!userRepository.existsByUsername(username)) {
+            AppUser user = new AppUser();
+            user.setUsername(username);
+            user.setPassword(""); // no password for GitHub users
+            user.setRole("USER");
+            userRepository.save(user);
+        }
+    }
+
+    public boolean userExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+
+    public boolean isOAuthUser(String username) {
+        AppUser user = userRepository.findByUsername(username).orElse(null);
+        return user != null && (user.getPassword() == null || user.getPassword().isEmpty());
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        AppUser user = findByUsername(username);
         return User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .roles("USER")
+                .roles(user.getRole()) // Use actual role
                 .build();
     }
 }
