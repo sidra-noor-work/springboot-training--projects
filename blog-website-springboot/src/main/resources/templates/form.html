@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>Blog Form</h1>
-
+<h2 th:text="'Welcome ' + ${username}">Welcome User</h2>
 <!-- Logout Button -->
 <form th:action="@{/logout}" method="post" style="text-align: right; margin-bottom: 20px;">
     <button type="submit" style="background-color: red; color: white; border: none; padding: 8px 16px; cursor: pointer;">
