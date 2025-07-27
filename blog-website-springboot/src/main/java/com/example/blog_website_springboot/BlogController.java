@@ -21,6 +21,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class BlogController {
 
+    @Autowired
+    private BlogService blogService;
+
 
     private final BlogRepository blogRepository;
     @Autowired
@@ -49,11 +52,19 @@ public class BlogController {
             return "redirect:/login";
         }
 
+        String loggedInUsername = authentication.getName();
+
+
+
+
+        System.out.println("Logged in as: " +  authentication.getName());
+
+
+        model.addAttribute("username", authentication.getName());
         model.addAttribute("blog", new Blog());
         model.addAttribute("blogs", blogRepository.findAll());
         return "form";
     }
-
     @GetMapping("/login")
     public String loginPage() {
         return "login";
@@ -79,7 +90,11 @@ public class BlogController {
 
 
     @PostMapping("/save")
-    public String saveBlog(@ModelAttribute Blog blog, Model model) {
+    public String saveBlog(@ModelAttribute Blog blog, Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            return "redirect:/login";
+        }
         blogRepository.save(blog);
         model.addAttribute("blog", new Blog());
         model.addAttribute("blogs", blogRepository.findAll());
@@ -88,7 +103,11 @@ public class BlogController {
         return "form";
     }
     @GetMapping("/edit/{id}")
-    public String editBlog(@PathVariable Long id, Model model) {
+    public String editBlog(@PathVariable Long id, Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            return "redirect:/login";
+        }
         Blog blog = blogRepository.findById(id).orElseThrow();
         model.addAttribute("blog", blog);
         model.addAttribute("blogs", blogRepository.findAll());
@@ -96,7 +115,11 @@ public class BlogController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteBlog(@PathVariable Long id) {
+    public String deleteBlog(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            return "redirect:/login";
+        }
         blogRepository.deleteById(id);
         return "form";
     }
@@ -121,7 +144,7 @@ public class BlogController {
             Cookie cookie = new Cookie("jwt", token);
             cookie.setHttpOnly(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60 * 2); // 2 minutes (optional)
+            cookie.setMaxAge(60 * 2);
             response.addCookie(cookie);
 
 
