@@ -1,4 +1,4 @@
-package com.example.blog_website_springboot;
+package com.example.blog_website_springboot.Configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

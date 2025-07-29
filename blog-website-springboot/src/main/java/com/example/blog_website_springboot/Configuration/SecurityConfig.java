@@ -1,5 +1,9 @@
-package com.example.blog_website_springboot;
+package com.example.blog_website_springboot.Configuration;
 
+import com.example.blog_website_springboot.Model.AppUser;
+import com.example.blog_website_springboot.JWT.JwtAuthFilter;
+import com.example.blog_website_springboot.JWT.JwtUtil;
+import com.example.blog_website_springboot.Service.UserService;
 import jakarta.servlet.http.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

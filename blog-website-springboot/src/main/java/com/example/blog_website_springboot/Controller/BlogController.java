@@ -1,15 +1,16 @@
-package com.example.blog_website_springboot;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+package com.example.blog_website_springboot.Controller;
+import com.example.blog_website_springboot.Model.AppUser;
+import com.example.blog_website_springboot.Model.Blog;
+import com.example.blog_website_springboot.Repository.BlogRepository;
+import com.example.blog_website_springboot.JWT.JwtUtil;
+import com.example.blog_website_springboot.Service.BlogService;
+import com.example.blog_website_springboot.Service.UserService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.GrantedAuthority;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -65,28 +66,7 @@ public class BlogController {
         model.addAttribute("blogs", blogRepository.findAll());
         return "form";
     }
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
-    }
 
-    @GetMapping("/signup")
-    public String signupForm(Model model) {
-        model.addAttribute("user", new AppUser());
-        return "signup";
-    }
-
-    @PostMapping("/signup")
-    public String signup(@ModelAttribute("user") AppUser user, RedirectAttributes redirectAttributes) {
-        boolean registered = userService.register(user);
-
-        if (!registered) {
-            redirectAttributes.addFlashAttribute("error", "User already exists!");
-            return "redirect:/login";
-        }
-
-        return "redirect:/login";
-    }
 
 
     @PostMapping("/save")
@@ -124,6 +104,29 @@ public class BlogController {
         return "form";
     }
 
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    @GetMapping("/signup")
+    public String signupForm(Model model) {
+        model.addAttribute("user", new AppUser());
+        return "signup";
+    }
+
+    @PostMapping("/signup")
+    public String signup(@ModelAttribute("user") AppUser user, RedirectAttributes redirectAttributes) {
+        boolean registered = userService.register(user);
+
+        if (!registered) {
+            redirectAttributes.addFlashAttribute("error", "User already exists!");
+            return "redirect:/login";
+        }
+
+        return "redirect:/login";
+    }
     @PostMapping("/login")
     public String login(@ModelAttribute AppUser request, HttpServletResponse response, Model model) {
         try {
@@ -156,7 +159,6 @@ public class BlogController {
             return "login";
         }
     }
-
 }
 
 

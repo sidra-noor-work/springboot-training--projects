@@ -1,5 +1,8 @@
-package com.example.blog_website_springboot;
+package com.example.blog_website_springboot.Service;
 
+import com.example.blog_website_springboot.Model.AppUser;
+import com.example.blog_website_springboot.JWT.JwtUtil;
+import com.example.blog_website_springboot.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;

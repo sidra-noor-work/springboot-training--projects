@@ -1,5 +1,6 @@
-package com.example.blog_website_springboot;
+package com.example.blog_website_springboot.JWT;
 
+import com.example.blog_website_springboot.Model.AppUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ public class JwtUtil {
     private final String SECRET_KEY = "my_super_secret_key_which_is_very_long123"; // At least 256-bit key required for HS256
     private final long EXPIRATION_TIME = 1000 * 60; // 1 minute in milliseconds
 
-    private Key getSigningKey() {
+    protected Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 

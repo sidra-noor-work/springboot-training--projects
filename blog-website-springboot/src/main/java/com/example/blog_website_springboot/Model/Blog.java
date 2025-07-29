@@ -1,9 +1,15 @@
-package com.example.blog_website_springboot;
+package com.example.blog_website_springboot.Model;
 
 
 
 import jakarta.persistence.*;
 import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
 @Entity
 public class Blog {
     @Id

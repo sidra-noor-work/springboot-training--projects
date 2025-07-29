@@ -1,7 +1,9 @@
-package com.example.blog_website_springboot;
+package com.example.blog_website_springboot.Service;
 
 
 
+import com.example.blog_website_springboot.Model.Blog;
+import com.example.blog_website_springboot.Repository.BlogRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
