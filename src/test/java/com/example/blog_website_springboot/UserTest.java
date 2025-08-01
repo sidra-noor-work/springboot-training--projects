@@ -9,6 +9,7 @@ import com.example.blog_website_springboot.Service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class UserServiceTest {
+class UserTest {
 
     private UserRepository userRepository;
     private JwtUtil jwtUtil;
@@ -120,7 +121,37 @@ class UserServiceTest {
 
         assertTrue(userService.isOAuthUser("oauthUser"));
     }
+    @Test
+    void loadUserByUsername_returnsUserDetails_whenUserExists() {
+        AppUser user = new AppUser();
+        user.setUsername("testuser");
+        user.setPassword("encodedPassword");
+        user.setRole("USER");
 
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        UserDetails userDetails = userService.loadUserByUsername("testuser");
+
+        assertNotNull(userDetails);
+        assertEquals("testuser", userDetails.getUsername());
+        assertEquals("encodedPassword", userDetails.getPassword());
+        assertTrue(userDetails.getAuthorities().stream().anyMatch(
+                a -> a.getAuthority().equals("ROLE_USER"))
+        );
+
+        verify(userRepository, times(1)).findByUsername("testuser");
+    }
+
+    @Test
+    void loadUserByUsername_throwsException_whenUserNotFound() {
+        when(userRepository.findByUsername("notfound")).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> {
+            userService.loadUserByUsername("notfound");
+        });
+
+        verify(userRepository, times(1)).findByUsername("notfound");
+    }
     @Test
     void isOAuthUser_shouldReturnFalse_ifPasswordPresent() {
         AppUser user = new AppUser();

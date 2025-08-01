@@ -1,0 +1,41 @@
+/* Login.css */
+
+body {
+ 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 15px;
+  background-color: #fff;
+}
+.btn-primary {
+  background-color: #6793AC !important;
+  border: none;
+    border-color: #4f7e94 !important;
+}
+
+.btn-primary:hover {
+  background-color: #4f7e94;
+}
+
+
+.custom-theme-btn:hover {
+  background-color: #547b91; /* Slightly darker shade for hover effect */
+  color: white;
+}
+.custom-theme-btn {
+  background-color: #648ba1 !important;
+  border-color: #4f7e94 !important;
+  color: white;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.custom-theme-btn:hover {
+      border-color: #4f7e94 !important;
+  background-color: #547b91; /* Slightly darker shade for hover effect */
+  color: white;
+}

@@ -1,6 +1,7 @@
 // src/pages/BlogForm.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from '../Components/Navbar';
 
 function BlogForm() {
   const [blogs, setBlogs] = useState([]);
@@ -56,19 +57,15 @@ function BlogForm() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // Clear token
-    alert('Logged out successfully');
-    window.location.href = '/login'; // Redirect
-  };
 
   return (
+<div>
+   <Navbar/>
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "1rem" }}>
+     
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>Create a Blog</h2>
-        <button onClick={handleLogout} style={{ background: "#dc3545", color: "white", padding: "0.5rem 1rem", border: "none", borderRadius: "5px", cursor: "pointer" }}>
-          Logout
-        </button>
+        
       </div>
 
       <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
@@ -101,6 +98,7 @@ function BlogForm() {
           </li>
         ))}
       </ul>
+    </div>
     </div>
   );
 }
