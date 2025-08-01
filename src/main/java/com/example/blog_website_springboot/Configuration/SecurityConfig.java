@@ -1,5 +1,4 @@
 package com.example.blog_website_springboot.Configuration;
-
 import com.example.blog_website_springboot.JWT.JwtAuthFilter;
 import com.example.blog_website_springboot.JWT.JwtUtil;
 import com.example.blog_website_springboot.Model.AppUser;
@@ -18,12 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtUtil jwtUtil;
 
@@ -31,7 +28,6 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
         this.jwtUtil = jwtUtil;
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService) throws Exception {
         http
@@ -46,7 +42,9 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/health",
                                 "/h2-console/**",
-                                "/css/**", "/js/**",
+                                "/css/**", "/js/**", "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
                                 "/oauth2/**",
                                 "/create", "/logout", "/edit/**", "/delete/**", "/home",
                                 "/signup", "/auth/signup"

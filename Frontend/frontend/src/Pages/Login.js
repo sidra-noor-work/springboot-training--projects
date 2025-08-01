@@ -1,4 +1,3 @@
-// src/pages/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -16,7 +15,15 @@ function Login() {
 
       const token = response.data.token;
       if (token) {
-        localStorage.setItem("token", token); // 🔐 Save JWT to localStorage
+        console.log('Token:', token);
+
+        // ✅ Save JWT to cookie for Spring Boot to read using @CookieValue("jwt")
+        document.cookie = `jwt=${token}; path=/; SameSite=Lax`;
+
+        // (Optional) Still store in localStorage if needed on client side
+        localStorage.setItem("token", token);
+
+        // Redirect to blogs page
         window.location.href = '/blogs';
       } else {
         setError("Login failed: No token received");

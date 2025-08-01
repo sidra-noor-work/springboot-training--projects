@@ -11,8 +11,8 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "my_super_secret_key_which_is_very_long123"; // At least 256-bit key required for HS256
-    private final long EXPIRATION_TIME = 1000 * 60; // 1 minute in milliseconds
+    private final String SECRET_KEY = "my_super_secret_key_which_is_very_long123";
+    private final long EXPIRATION_TIME = 1000 * 60*60;
 
     protected Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());

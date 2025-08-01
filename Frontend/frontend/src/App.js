@@ -1,9 +1,9 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Signup from './Signup';
-import BlogForm from './BlogForm';
+import Login from './Pages/Login';
+import Signup from './Pages/Signup';
+import BlogForm from './Pages/BlogForm';
 function App() {
   return (
     <BrowserRouter>

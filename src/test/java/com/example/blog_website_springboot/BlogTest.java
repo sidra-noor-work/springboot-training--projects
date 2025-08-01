@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class BlogControllerTest {
+class BlogTest {
 
     private BlogRepository blogRepository = mock(BlogRepository.class);
     private UserService userService = mock(UserService.class);
