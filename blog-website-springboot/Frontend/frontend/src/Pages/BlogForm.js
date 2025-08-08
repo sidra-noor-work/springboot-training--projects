@@ -2,14 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-
 function BlogForm() {
   const [blogs, setBlogs] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
   useEffect(() => {
-    // Attempt to load blogs, sending cookies automatically
+
     axios.get('http://localhost:8080/blogs', { withCredentials: true })
       .then(res => {
         if (res.data.success) {
@@ -36,7 +35,7 @@ function BlogForm() {
 
       setTitle('');
       setContent('');
-      // Reload blogs after successful post
+
       const res = await axios.get('http://localhost:8080/blogs', { withCredentials: true });
       if (res.data.success) {
         setBlogs(res.data.data);
