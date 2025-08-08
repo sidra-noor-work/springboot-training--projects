@@ -1,0 +1,46 @@
+/* Styles/Navbar.css */
+
+.custom-navbar {
+  background-color: #6793AC !important;
+}
+
+.navbar .nav-link,
+.navbar .form-search input,
+.navbar .form-search .btn {
+  color: white !important;
+}
+
+.navbar .nav-link:hover {
+  color: #ddd !important;
+}
+
+.nav-theme {
+  color: white !important;
+  font-weight: 500;
+}
+.blog-title {
+  color: white !important;
+}
+
+.btn-theme {
+  background-color: white;
+  color: #6793AC;
+  border: none;
+}
+
+.btn-theme:hover {
+  background-color: #f0f0f0;
+  color: #4a6b81;
+}
+.btn-theme-outline {
+ 
+  color: white !important;
+  border: 1px solid #ff4d4d !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in-out !important;
+}
+
+.btn-theme-outline:hover {
+  background-color: #ff4d4d !important;
+  color: white !important;
+}

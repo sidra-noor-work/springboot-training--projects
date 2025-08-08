@@ -11,6 +11,9 @@
 	<groupId>com.example</groupId>
 	<artifactId>blog-website-springboot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+
+	<packaging>jar</packaging>
 	<name>blog-website-springboot</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -79,6 +82,11 @@
 			<version>0.11.5</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
 			<version>0.11.5</version>
@@ -106,17 +114,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+
+
+
+
 	</dependencies>
 
 	<build>
@@ -155,24 +162,47 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.21.2</version> <!-- latest as of now -->
-				<configuration>
-					<printFailingErrors>true</printFailingErrors>
-
-					<targetJdk>17</targetJdk> <!-- or 11, depending on your Java version -->
-				</configuration>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.11</version>
 				<executions>
 					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
 						<phase>verify</phase>
 						<goals>
-							<goal>check</goal>
-							<goal>pmd</goal>
+							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
+
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-pmd-plugin</artifactId>
+						<version>3.21.0</version>
+						<configuration>
+							<rulesets>
+								<ruleset>rulesets/java/basic.xml</ruleset>
+								<ruleset>rulesets/java/braces.xml</ruleset>
+							</rulesets>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

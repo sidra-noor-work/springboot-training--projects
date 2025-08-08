@@ -31,6 +31,9 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
         return true;
     }
+    public AppUser save(AppUser user) {
+        return userRepository.save(user);
+    }
 
     public String authenticate(String username, String rawPassword) {
         AppUser user;

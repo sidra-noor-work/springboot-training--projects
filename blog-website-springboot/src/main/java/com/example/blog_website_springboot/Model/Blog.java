@@ -1,7 +1,5 @@
 package com.example.blog_website_springboot.Model;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,38 +7,23 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
 public class Blog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String content;
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
+    private String username;
+    public Blog(Long id, String title, String content) {
         this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
         this.content = content;
     }
+    public Blog(String title, String content, String username) {
+        this.title = title;
+        this.content = content;
+        this.username = username;
+    }
 }
-
