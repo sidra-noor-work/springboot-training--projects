@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -23,10 +25,18 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtUtil jwtUtil;
+    private final UserService userService;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, JwtUtil jwtUtil) {
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, JwtUtil jwtUtil,UserService userService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.jwtUtil = jwtUtil;
+        this.userService = userService;
+    }
+
+    @Bean
+    public SecurityContextLogoutHandler securityContextLogoutHandler() {
+        return new SecurityContextLogoutHandler();
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService) throws Exception {
@@ -49,7 +59,7 @@ public class SecurityConfig {
                                 "/create", "/logout", "/edit/**", "/delete/**", "/home",
                                 "/signup", "/auth/signup"
                         ).permitAll()
-                        .requestMatchers("/blogs").authenticated() // explicitly protect /blogs
+                        .requestMatchers("/blogs","/createblog").authenticated() // explicitly protect /blogs
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -69,16 +79,28 @@ public class SecurityConfig {
                             String username = oAuth2User.getAttribute("login");
                             userService.registerOAuthUserIfNeeded(username);
                             AppUser user = userService.findByUsername(username);
+
                             String jwt = jwtUtil.generateToken(user);
 
-                            Cookie cookie = new Cookie("jwt", jwt);
-                            cookie.setHttpOnly(true);
-                            cookie.setPath("/");
-                            cookie.setMaxAge(3600);
-                            response.addCookie(cookie);
+                            boolean isLocalDev = request.getServerName().equals("localhost");
 
-                            response.sendRedirect("/create");
+                            // Set JWT cookie manually with proper attributes
+                            String sameSite = isLocalDev ? "Lax" : "None";
+                            String secureFlag = isLocalDev ? "" : "; Secure";
+
+                            response.setHeader("Set-Cookie",
+                                    String.format("jwt=%s; Max-Age=3600; Path=/; HttpOnly; SameSite=%s%s",
+                                            jwt,
+                                            sameSite,
+                                            secureFlag
+                                    )
+                            );
+                            // Redirect to frontend
+                            response.sendRedirect("http://localhost:3000/createblog");
                         })
+
+
+
                 )
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout
@@ -88,11 +110,32 @@ public class SecurityConfig {
                             response.setStatus(200);
                             response.setContentType("application/json");
                             response.getWriter().write("{\"message\": \"Logged out successfully\"}");
+
                         })
                         .permitAll()
                 );
 
         return http.build();
+    }
+    public AuthenticationSuccessHandler oauth2SuccessHandler(UserService userService) {
+        return (request, response, authentication) -> {
+            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+            String username = oAuth2User.getAttribute("login");
+            userService.registerOAuthUserIfNeeded(username);
+            AppUser user = userService.findByUsername(username);
+
+            String jwt = jwtUtil.generateToken(user);
+
+            boolean isLocalDev = request.getServerName().equals("localhost");
+            String sameSite = isLocalDev ? "Lax" : "None";
+            String secureFlag = isLocalDev ? "" : "; Secure";
+
+            response.setHeader("Set-Cookie",
+                    String.format("jwt=%s; Max-Age=3600; Path=/; HttpOnly; SameSite=%s%s",
+                            jwt, sameSite, secureFlag)
+            );
+            response.sendRedirect("http://localhost:3000/createblog");
+        };
     }
 
     @Bean
@@ -105,7 +148,7 @@ public class SecurityConfig {
         return new CorsFilter(corsConfigurationSource());
     }
 
-    private UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    public  UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);

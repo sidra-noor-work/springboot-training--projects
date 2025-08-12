@@ -1,19 +1,25 @@
 import React from 'react';
 import '../Styles/Navbar.css';
 import logo from '../Assets/icon.jpg';
-
+import axios from 'axios';
 const Navbar = () => {
-  const handleLogout = () => {
+const handleLogout = async () => {
+  try {
+    await axios.post('http://localhost:8080/auth/logout', {}, { withCredentials: true });
     localStorage.removeItem('token');
     alert('Logged out successfully');
     window.location.href = '/login';
-  };
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Logout failed, please try again.');
+  }
+};
+
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark custom-navbar px-3">
       <div className="container-fluid d-flex justify-content-between align-items-center">
 
-        {/* Left Section */}
         <div className="d-flex align-items-center">
           <a className="navbar-brand d-flex align-items-center me-3" href="#">
             <img src={logo} alt="App Logo" height="36" className="me-2 rounded-circle" />
@@ -35,14 +41,14 @@ const Navbar = () => {
         
         </div>
 
-        {/* Right Section */}
+       
         <div className="d-flex align-items-center">
           <ul className="navbar-nav d-flex flex-row align-items-center">
             <li className="nav-item me-3">
-              <a className="nav-link nav-theme" href="#!">Create</a>
+              <a className="nav-link nav-theme" href="/createblog">Create</a>
             </li>
             <li className="nav-item me-3">
-              <a className="nav-link nav-theme" href="#!"><i className="fas fa-bookmark pe-2"></i>All</a>
+              <a className="nav-link nav-theme" href="/blogs"><i className="fas fa-bookmark pe-2"></i>All</a>
             </li>
             <li className="nav-item me-3">
               <a className="nav-link nav-theme" href="/login">Log In</a>

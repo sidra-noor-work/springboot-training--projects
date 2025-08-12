@@ -162,4 +162,52 @@ class UserTest {
 
         assertFalse(userService.isOAuthUser("normalUser"));
     }
+
+    @Test
+    void authenticate_shouldReturnNull_whenUserNotFound() {
+        when(userRepository.findByUsername("nouser")).thenReturn(Optional.empty());
+
+        String token = userService.authenticate("nouser", "anyPass");
+
+        assertNull(token);
+    }
+
+    @Test
+    void authenticate_shouldPropagateException_whenJwtUtilThrows() {
+        AppUser user = new AppUser();
+        user.setUsername("user");
+        user.setPassword("encodedPass");
+
+        when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("rawPass", "encodedPass")).thenReturn(true);
+        when(jwtUtil.generateToken(user)).thenThrow(new RuntimeException("JWT error"));
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userService.authenticate("user", "rawPass");
+        });
+
+        assertEquals("JWT error", exception.getMessage());
+    }
+
+    @Test
+    void isOAuthUser_shouldReturnFalse_whenUserNotFound() {
+        when(userRepository.findByUsername("unknownUser")).thenReturn(Optional.empty());
+
+        boolean result = userService.isOAuthUser("unknownUser");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void findByUsername_shouldThrowException_whenRepositoryThrows() {
+        when(userRepository.findByUsername("errorUser")).thenThrow(new RuntimeException("DB error"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userService.findByUsername("errorUser");
+        });
+
+        assertEquals("DB error", exception.getMessage());
+    }
+
+
 }

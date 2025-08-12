@@ -11,6 +11,9 @@
 	<groupId>com.example</groupId>
 	<artifactId>blog-website-springboot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+
+	<packaging>jar</packaging>
 	<name>blog-website-springboot</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -79,6 +82,11 @@
 			<version>0.11.5</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
 			<version>0.11.5</version>
@@ -114,6 +122,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.11.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -139,7 +153,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.1</version>
 				<configuration>
 					<configLocation>google_checks.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
@@ -173,38 +187,26 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
-						<configuration>
-							<excludes>
-								<exclude>**/BlogWebsiteSpringbootApplication.class</exclude>
-								<exclude>**/config/**</exclude>
-								<exclude>**/dto/**</exclude>
-								<exclude>**/constants/**</exclude>
-								<exclude>**/*Exception*.class</exclude>
-							</excludes>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.21.2</version> <!-- latest as of now -->
+				<version>3.21.2</version> <!-- Latest stable -->
 				<configuration>
-					<printFailingErrors>true</printFailingErrors>
-
-					<targetJdk>17</targetJdk> <!-- or 11, depending on your Java version -->
+					<rulesets>
+						<ruleset>category/java/bestpractices.xml</ruleset>
+						<ruleset>category/java/codestyle.xml</ruleset>
+						<ruleset>category/java/errorprone.xml</ruleset>
+					</rulesets>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>verify</phase>
-						<goals>
-							<goal>check</goal>
-							<goal>pmd</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
+
+
+
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

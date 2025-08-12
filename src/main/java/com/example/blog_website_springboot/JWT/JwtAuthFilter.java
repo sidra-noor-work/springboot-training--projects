@@ -30,9 +30,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         System.out.println("Incoming request path: " + path);
         return path.equals("/auth/signup") ||
                 path.equals("/auth/login") ||
+                path.equals("/auth/logout") ||  // add logout path here
                 path.startsWith("/h2-console") ||
                 path.startsWith("/css") ||
-                path.startsWith("/js");
+                path.startsWith("/js") ||
+                path.startsWith("/oauth2");     // allow oauth2 endpoint bypass filter
     }
 
     @Override
@@ -44,26 +46,35 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String jwt = null;
         String username = null;
 
-        // 1. Check Authorization header
+        // Check Authorization header first
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
+            System.out.println("JWT found in Authorization header");
         }
+
+        // Else check cookies
         if (jwt == null && request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("jwt".equals(cookie.getName())) {
                     jwt = cookie.getValue();
+                    System.out.println("JWT found in cookie");
                     break;
                 }
             }
         }
-     if (jwt != null) {
+
+        if (jwt != null) {
             try {
                 username = jwtUtil.extractUsername(jwt);
+                System.out.println("Username from JWT: " + username);
             } catch (Exception e) {
                 System.out.println("JWT extraction failed: " + e.getMessage());
             }
+        } else {
+            System.out.println("No JWT found in request");
         }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(jwt)) {
                 UserDetails userDetails = userService.loadUserByUsername(username);
@@ -71,6 +82,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("User authenticated via JWT");
             } else {
                 System.out.println("JWT is invalid or expired.");
             }
@@ -78,4 +90,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }

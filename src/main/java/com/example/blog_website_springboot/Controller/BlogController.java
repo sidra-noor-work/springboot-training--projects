@@ -6,16 +6,18 @@ import com.example.blog_website_springboot.Repository.BlogRepository;
 import com.example.blog_website_springboot.JWT.JwtUtil;
 import com.example.blog_website_springboot.Service.BlogService;
 import com.example.blog_website_springboot.Service.UserService;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,29 +29,32 @@ import java.util.Optional;
 @RequestMapping("/")
 @CrossOrigin(origins = "*") // Allow CORS for testing with Postman
 public class BlogController {
-
-    @Autowired
-    private BlogService blogService;
-
+    private final SecurityContextLogoutHandler logoutHandler;
+    private final BlogService blogService;
     private final BlogRepository blogRepository;
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    public BlogController(BlogRepository blogRepository) {
+    public BlogController(
+            BlogService blogService,
+            BlogRepository blogRepository,
+            UserService userService,
+            AuthenticationManager authenticationManager,
+            JwtUtil jwtUtil,
+            SecurityContextLogoutHandler logoutHandler
+    ) {
+        this.blogService = blogService;
         this.blogRepository = blogRepository;
+        this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.logoutHandler = logoutHandler;
     }
 
     @PostMapping("/auth/signup")
     public ResponseEntity<Map<String, Object>> signup(@RequestBody AppUser user) {
         Map<String, Object> response = new HashMap<>();
-
 
         System.out.println("Received signup request: username = " + user.getUsername() + ", password = " + user.getPassword());
 
@@ -72,7 +77,6 @@ public class BlogController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
     @PostMapping("/auth/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AppUser request) {
@@ -106,7 +110,6 @@ public class BlogController {
         }
     }
 
-    // Blog CRUD endpoints
     @GetMapping("/blogs")
     public ResponseEntity<Map<String, Object>> getAllBlogs(Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
@@ -172,7 +175,6 @@ public class BlogController {
         }
 
         try {
-            // Validate input
             if (blog.getTitle() == null || blog.getTitle().trim().isEmpty()) {
                 response.put("success", false);
                 response.put("message", "Blog title is required");
@@ -217,7 +219,6 @@ public class BlogController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
 
-            // Validate input
             if (blog.getTitle() == null || blog.getTitle().trim().isEmpty()) {
                 response.put("success", false);
                 response.put("message", "Blog title is required");
@@ -230,7 +231,7 @@ public class BlogController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
 
-            blog.setId(id); // Ensure the ID is set
+            blog.setId(id);
             Blog updatedBlog = blogRepository.save(blog);
 
             response.put("success", true);
@@ -244,6 +245,25 @@ public class BlogController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Object> resp = new HashMap<>();
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                logoutHandler.logout(request, response, auth);
+            }
+            resp.put("success", true);
+            resp.put("message", "Logged out successfully");
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            resp.put("success", false);
+            resp.put("message", "Logout failed: " + e.getMessage());
+            // Change this line to return status 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resp);
+        }
+    }
+
 
     @DeleteMapping("/blogs/{id}")
     public ResponseEntity<Map<String, Object>> deleteBlog(@PathVariable Long id, Authentication authentication) {
@@ -277,14 +297,13 @@ public class BlogController {
         }
     }
 
-    // Helper method to check authentication
     private boolean isAuthenticated(Authentication authentication) {
         return authentication != null &&
                 authentication.isAuthenticated() &&
                 !(authentication instanceof AnonymousAuthenticationToken);
     }
 
-    // Health check endpoint
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> healthCheck() {
         Map<String, String> response = new HashMap<>();
@@ -292,4 +311,7 @@ public class BlogController {
         response.put("message", "Blog API is running");
         return ResponseEntity.ok(response);
     }
+
+
+
 }

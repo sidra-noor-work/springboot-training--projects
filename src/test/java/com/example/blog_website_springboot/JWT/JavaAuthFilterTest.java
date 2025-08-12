@@ -147,4 +147,71 @@ public class JavaAuthFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(req, response);
     }
+
+
+    ///
+    @Test
+    public void shouldNotFilter_cssPath() {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRequestURI("/css/style.css");
+        assertTrue(jwtAuthFilter.shouldNotFilter(req));
+    }
+
+    @Test
+    public void shouldNotFilter_jsPath() {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRequestURI("/js/app.js");
+        assertTrue(jwtAuthFilter.shouldNotFilter(req));
+    }
+
+    @Test
+    public void shouldNotFilter_oauth2Path() {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRequestURI("/oauth2/callback");
+        assertTrue(jwtAuthFilter.shouldNotFilter(req));
+    }
+
+    @Test
+    public void testDoFilterInternal_authenticationAlreadySet() throws ServletException, IOException {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addHeader("Authorization", "Bearer valid.jwt.token");
+        req.setRequestURI("/blogs");
+
+        // Set Authentication already present in SecurityContextHolder
+        SecurityContextHolder.getContext().setAuthentication(mock(Authentication.class));
+
+        jwtAuthFilter.doFilterInternal(req, response, filterChain);
+
+        // Should skip auth setup, but continue filter chain
+        verify(filterChain).doFilter(req, response);
+    }
+
+    @Test
+    public void testDoFilterInternal_jwtNull_noAuthSetup() throws ServletException, IOException {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRequestURI("/blogs");
+
+        // Simulate cookies without jwt cookie
+        req.setCookies(new Cookie("other", "value"));
+
+        jwtAuthFilter.doFilterInternal(req, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(req, response);
+    }
+
+    @Test
+    public void testDoFilterInternal_jwtInvalidTokenThrowsException() throws ServletException, IOException {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addHeader("Authorization", "Bearer bad.token");
+        req.setRequestURI("/blogs");
+
+        when(jwtUtil.extractUsername("bad.token")).thenThrow(new RuntimeException("Bad token"));
+
+        jwtAuthFilter.doFilterInternal(req, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(req, response);
+    }
+
 }

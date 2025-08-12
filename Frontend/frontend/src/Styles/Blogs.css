@@ -1,64 +1,7 @@
-/* Blogs.css */
 .blogs-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-}
-
-.blogs-header {
-  background: linear-gradient(120deg, #1a2a6c, #2a5298);
-  color: white;
-  padding: 60px 20px;
-  border-radius: 0 0 20px 20px;
-  margin-bottom: 40px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.header-content {
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.professional-heading {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  margin-bottom: 30px;
-}
-
-.category-filter {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.category-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: white;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.category-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.category-btn.active {
-  background: white;
-  color: #1a2a6c;
-  font-weight: 500;
 }
 
 .blog-grid {
@@ -134,11 +77,8 @@
 }
 
 .blog-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #212529;
-  line-height: 1.4;
+  font-weight: bold;
+  font-size: 1.25rem;
 }
 
 .blog-excerpt {
@@ -198,11 +138,8 @@
 }
 
 .like-button.liked {
-  color: #e63946;
-}
-
-.like-button.liked:hover {
-  background: rgba(230, 57, 70, 0.1);
+  background-color: #ffefef;
+  color: red;
 }
 
 .like-icon {
@@ -215,8 +152,8 @@
 }
 
 .like-button.liked .like-icon {
-  fill: #e63946;
-  stroke: #e63946;
+  fill: red;
+  stroke: red;
 }
 
 .read-more {
@@ -244,75 +181,8 @@
   stroke-width: 2;
 }
 
-.load-more-container {
-  text-align: center;
-  margin: 40px 0;
-}
-
-.load-more-btn {
-  background: white;
-  border: 2px solid #2a5298;
-  color: #2a5298;
-  padding: 12px 35px;
-  border-radius: 30px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.load-more-btn:hover {
-  background: #2a5298;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
-}
-
-.error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 15px;
-  border-radius: 8px;
-  margin: 20px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.error-icon {
-  font-size: 1.2rem;
-}
-
-.loading-container {
-  text-align: center;
-  padding: 50px 0;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(42, 82, 152, 0.2);
-  border-top: 5px solid #2a5298;
-  border-radius: 50%;
-  margin: 0 auto 20px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 @media (max-width: 768px) {
   .blog-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .blogs-header {
-    padding: 40px 15px;
-  }
-  
-  .professional-heading {
-    font-size: 2rem;
   }
 }
