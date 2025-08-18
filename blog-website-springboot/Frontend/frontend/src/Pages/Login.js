@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import api from '../Services/axiosConfig';
 import '../Styles/Login.css';
 
 function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-useEffect(() => {
- 
-  axios.post('http://localhost:8080/logout', {}, { withCredentials: true })
-    .catch(err => console.log('No active session to clear', err));
-}, []);
 
+  // Clear any previous session
+  useEffect(() => {
+    api.post('/logout').catch(err => console.log('No active session to clear', err));
+    // Remove JWT cookie if present
+    Cookies.remove('jwt_token');
+  }, []);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,12 +20,17 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/auth/login', formData);
+      const response = await api.post('/auth/login', formData);
 
-      const token = response.data.token;
+      const token = response.data.token; 
       if (token) {
-        document.cookie = `jwt=${token}; path=/; SameSite=Lax`;
-        localStorage.setItem("token", token);
+        // Store JWT in cookie for authentication
+        Cookies.set('jwt_token', token, { expires: 1, path: '/' });
+
+        // Optionally store in localStorage if needed for Axios headers
+        localStorage.setItem('token', token);
+
+        // Redirect to blogs page
         window.location.href = '/blogs';
       } else {
         setError("Login failed: No token received");
