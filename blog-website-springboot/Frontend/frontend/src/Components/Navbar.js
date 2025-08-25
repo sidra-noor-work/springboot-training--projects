@@ -47,8 +47,9 @@ const handleLogout = async () => {
             <li className="nav-item me-3">
               <a className="nav-link nav-theme" href="/createblog">Create</a>
             </li>
+      
             <li className="nav-item me-3">
-              <a className="nav-link nav-theme" href="/blogs"><i className="fas fa-bookmark pe-2"></i>All</a>
+              <a className="nav-link nav-theme" href="/allblogs"><i className="fas fa-bookmark pe-2"></i>All</a>
             </li>
             <li className="nav-item me-3">
               <a className="nav-link nav-theme" href="/login">Log In</a>

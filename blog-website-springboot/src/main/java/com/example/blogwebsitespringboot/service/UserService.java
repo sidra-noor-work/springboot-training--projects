@@ -19,6 +19,7 @@ public class UserService implements UserDetailsService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
+
     @Autowired
     public UserService(final UserRepository userRepository,
                        final JwtUtil jwtUtil,

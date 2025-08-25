@@ -1,80 +1,115 @@
+
 import React, { useState, useEffect } from 'react';
-import api from '../Services/axiosConfig';
-import '../Styles/Login.css';
+import axios from 'axios';
+import '../Styles/Signup.css';
+
+// Configure axios defaults
+axios.defaults.withCredentials = true;
 
 function Signup() {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
-  // Optional: clear previous session and ensure CSRF cookie
+  // Function to get CSRF token from cookie
+  const getCsrfTokenFromCookie = () => {
+    const name = 'XSRF-TOKEN=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) === 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return '';
+  };
+
   useEffect(() => {
-    api.post('/logout').catch(err => console.log('No active session to clear', err));
-    api.get('/auth/csrf').catch(err => console.log('CSRF cookie set', err));
-  }, []);
-useEffect(() => {
-  // Fetch CSRF cookie first
-  api.get('/auth/csrf')
-    .then(res => console.log('CSRF cookie set'))
-    .catch(err => console.log('Failed to set CSRF cookie', err));
+    // Fetch CSRF token on component mount
+    const fetchCsrfToken = async () => {
+      try {
+        await axios.get('http://localhost:8080/api/csrf', { withCredentials: true });
+      } catch (err) {
+        console.log('Error fetching CSRF token:', err);
+      }
+    };
 
-  // Optional: clear any previous session
-  api.post('/logout').catch(err => console.log('No active session to clear', err));
-}, []);
+    fetchCsrfToken();
+  }, []);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
     try {
-      const response = await api.post('/auth/signup', formData);
+      const token = getCsrfTokenFromCookie();
+      console.log("Sending to backend:", formData);
 
-      if (response.status === 200 || response.status === 201) {
-        setSuccess('Signup successful! Redirecting to login...');
-        setTimeout(() => window.location.href = '/login', 2000);
-      } else {
-        setError('Signup failed: Unknown error');
-      }
+      const res = await axios.post('http://localhost:8080/auth/signup', formData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': token
+        },
+      });
+
+      console.log("Signup successful:", res.data);
+      window.location.href = '/login';
     } catch (err) {
-      console.log(err.response);
-      setError(`Signup failed: ${err.response?.data?.message || 'Unauthorized'}`);
+      console.error("Signup failed:", err);
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Signup failed. Please try again.';
+      setError(errorMsg);
     }
   };
 
   return (
-    <div className="login-wrapper d-flex justify-content-center align-items-center vh-100">
-      <div className="login-card p-4 shadow-lg">
-        <h2 className="text-center mb-4 text-primary-color">Create Account</h2>
+    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="card p-4 shadow" style={{ maxWidth: '400px', width: '100%' }}>
+        <h2 className="text-center mb-4 text-primary-color">Welcome </h2>
+        <h3 className="text-center mb-3">Sign Up</h3>
         {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
-
         <form onSubmit={handleSubmit}>
-          <div className="form-group mb-3">
-            <label className="form-label">Username</label>
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label">Username</label>
             <input
+              type="text"
               name="username"
-              className="form-control custom-input"
+              className="form-control"
+              value={formData.username}
               onChange={handleChange}
               required
             />
           </div>
-          <div className="form-group mb-4">
-            <label className="form-label">Password</label>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Password</label>
             <input
               type="password"
               name="password"
-              className="form-control custom-input"
+              className="form-control"
+              value={formData.password}
               onChange={handleChange}
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100">Signup</button>
+
+          <div className="d-grid">
+            <button type="submit" className="btn btn-primary">Sign Up</button>
+          </div>
         </form>
 
-        <div className="text-center mt-3">
-          <p>Already have an account? <a href="/login" className="text-link">Login here</a></p>
-        </div>
+        <p className="text-center mt-3">
+          Already have an account? <a href="/login">Login here</a>
+        </p>
       </div>
     </div>
   );

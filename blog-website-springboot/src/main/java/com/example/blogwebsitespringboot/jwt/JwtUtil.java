@@ -6,25 +6,35 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.security.Key;
 @Component
-public final class JwtUtil {
+public class JwtUtil {
 
-    // Secure 256-bit secret key (HS256 requires at least 32 bytes)
-    private static final String SECRET_KEY =
-            "my_super_secret_key_which_is_at_least_32_bytes_long_12345";
-    private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1 hour
+    private final String SECRET_KEY;
+    private final long EXPIRATION_TIME;
 
-    private JwtUtil() {
-        // Prevent instantiation
+    public JwtUtil() {
+        this.SECRET_KEY = "my_super_secret_key_which_is_very_long123";
+        this.EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
     }
 
-    private static Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    public JwtUtil(String secret) {
+        this.SECRET_KEY = secret;
+        this.EXPIRATION_TIME = 1000 * 60 * 60;
     }
 
-    public static String generateToken(final AppUser user) {
+    protected Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    }
+
+    // ✅ Generate JWT from AppUser
+    public String generateToken(AppUser user) {
         if (user == null || user.getUsername() == null) {
             throw new IllegalArgumentException("Invalid user provided to generateToken");
         }
@@ -38,7 +48,8 @@ public final class JwtUtil {
                 .compact();
     }
 
-    public static String generateToken(final String username) {
+    // Generate JWT from username only
+    public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
@@ -47,7 +58,7 @@ public final class JwtUtil {
                 .compact();
     }
 
-    public static String extractUsername(final String token) {
+    public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -56,24 +67,19 @@ public final class JwtUtil {
                 .getSubject();
     }
 
-    public static boolean validateToken(final String token) {
-        if (token == null || token.trim().isEmpty()) {
-            return false;
-        }
-
+    public boolean validateToken(String token) {
         try {
-            final Jws<Claims> claims =
-                    Jwts.parserBuilder()
-                            .setSigningKey(getSigningKey())
-                            .build()
-                            .parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
 
             return !claims.getBody().getExpiration().before(new Date());
-        } catch (ExpiredJwtException
-                 | UnsupportedJwtException
-                 | MalformedJwtException
-                 | SignatureException
-                 | IllegalArgumentException e) {
+
+        } catch (ExpiredJwtException | UnsupportedJwtException |
+                 MalformedJwtException | SignatureException |
+                 IllegalArgumentException e) {
+            System.out.println("JWT validation error: " + e.getMessage());
             return false;
         }
     }

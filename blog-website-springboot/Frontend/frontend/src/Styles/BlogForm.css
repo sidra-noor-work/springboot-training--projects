@@ -1,5 +1,4 @@
 /* BlogForm.css */
-
 .blog-form-container {
   max-width: 800px;
   margin: 0 auto;
@@ -31,13 +30,13 @@
   border-left: 4px solid;
 }
 
-.error {
+.alert.error {
   background-color: #fee2e2;
   border-color: #dc2626;
   color: #b91c1c;
 }
 
-.success {
+.alert.success {
   background-color: #dcfce7;
   border-color: #16a34a;
   color: #166534;
@@ -70,6 +69,7 @@
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -82,14 +82,16 @@
 .form-group textarea {
   min-height: 150px;
   resize: vertical;
+  font-family: inherit;
 }
 
 .form-actions {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-button {
+.blog-form-container button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,6 +102,7 @@ button {
   transition: background-color 0.2s;
   border: none;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -107,7 +110,7 @@ button {
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background-color: #2563eb;
 }
 
@@ -116,7 +119,7 @@ button {
   color: white;
 }
 
-.btn-warning:hover {
+.btn-warning:hover:not(:disabled) {
   background-color: #d97706;
 }
 
@@ -125,7 +128,7 @@ button {
   color: #4b5563;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background-color: #d1d5db;
 }
 
@@ -134,7 +137,7 @@ button {
   color: #0369a1;
 }
 
-.btn-edit:hover {
+.btn-edit:hover:not(:disabled) {
   background-color: #bae6fd;
 }
 
@@ -143,12 +146,14 @@ button {
   color: #b91c1c;
 }
 
-.btn-delete:hover {
+.btn-delete:hover:not(:disabled) {
   background-color: #fecaca;
 }
 
 .icon {
   margin-right: 0.5rem;
+  width: 16px;
+  height: 16px;
 }
 
 .spin {
@@ -156,12 +161,8 @@ button {
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .auth-check,
@@ -222,11 +223,13 @@ button {
   color: #4b5563;
   margin-bottom: 1rem;
   white-space: pre-line;
+  line-height: 1.6;
 }
 
 .blog-actions {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .empty-state {
@@ -238,7 +241,30 @@ button {
   color: #6b7280;
 }
 
-button:disabled {
+.blog-form-container button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .blog-form-container {
+    padding: 1rem;
+  }
+  
+  .form-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .blog-actions {
+    flex-direction: column;
+  }
+  
+  .form-card {
+    padding: 1rem;
+  }
 }

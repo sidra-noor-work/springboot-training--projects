@@ -63,7 +63,8 @@ class BlogTest {
         blogService = new BlogService(blogRepository); // If BlogService is simple enough
         userService = mock(UserService.class);
         authenticationManager = mock(AuthenticationManager.class);
-        jwtUtil = new JwtUtil("my_super_secret_key_which_is_very_long123456"); // Ensure long enough key
+        // JwtUtil is static utility, no need to instantiate
+        // jwtUtil = new JwtUtil("my_super_secret_key_which_is_very_long123456"); // Remove this line
 
         // Instantiate controller with all required constructor arguments
         blogController = new BlogController(
@@ -195,32 +196,28 @@ class BlogTest {
     // JWT Utility Tests
     @Test
     void testGenerateTokenWithUser() {
-        JwtUtil realJwtUtil = new JwtUtil();
-        String token = realJwtUtil.generateToken(mockUser);
+        String token = JwtUtil.generateToken(mockUser);
         assertNotNull(token, "Token should not be null");
         assertTrue(token.length() > 0, "Token should not be empty");
     }
 
     @Test
     void testGenerateTokenWithUsername() {
-        JwtUtil realJwtUtil = new JwtUtil();
-        String token = realJwtUtil.generateToken("testuser");
+        String token = JwtUtil.generateToken("testuser");
         assertNotNull(token, "Token should not be null");
     }
 
     @Test
     void testExtractUsername() {
-        JwtUtil realJwtUtil = new JwtUtil();
-        String token = realJwtUtil.generateToken("testuser");
-        String username = realJwtUtil.extractUsername(token);
+        String token = JwtUtil.generateToken("testuser");
+        String username = JwtUtil.extractUsername(token);
         assertEquals("testuser", username);
     }
 
     @Test
     void testValidateToken_validToken() {
-        JwtUtil realJwtUtil = new JwtUtil();
-        String token = realJwtUtil.generateToken("testuser");
-        assertTrue(realJwtUtil.validateToken(token));
+        String token = JwtUtil.generateToken("testuser");
+        assertTrue(JwtUtil.validateToken(token));
     }
 
     // Authentication API Tests

@@ -1,5 +1,6 @@
 package com.example.blogwebsitespringboot.service;
 
+
 import com.example.blogwebsitespringboot.model.Blog;
 import com.example.blogwebsitespringboot.repository.BlogRepository;
 import org.springframework.stereotype.Service;
@@ -8,25 +9,25 @@ import java.util.List;
 @Service
 public class BlogService {
 
-    private final BlogRepository blogRepository;
+    private final BlogRepository repo;
 
-    public BlogService(final BlogRepository blogRepository) {
-        this.blogRepository = blogRepository;
+    public BlogService(BlogRepository repo) {
+        this.repo = repo;
     }
 
     public List<Blog> getAll() {
-        return blogRepository.findAll();
+        return repo.findAll();
     }
 
-    public Blog get(final Long blogId) {
-        return blogRepository.findById(blogId).orElse(null);
+    public Blog get(Long id) {
+        return repo.findById(id).orElse(null);
     }
 
-    public Blog save(final Blog blog) {
-        return blogRepository.save(blog);
+    public Blog save(Blog blog) {
+        return repo.save(blog);
     }
 
-    public void delete(final Long blogId) {
-        blogRepository.deleteById(blogId);
+    public void delete(Long id) {
+        repo.deleteById(id);
     }
 }

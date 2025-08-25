@@ -3,6 +3,9 @@ import axios from 'axios';
 import { Navigate } from 'react-router-dom';
 import '../Styles/Blogs.css';
 
+// Configure axios defaults
+axios.defaults.withCredentials = true;
+
 function Blogs() {
   const [blogs, setBlogs] = useState([]);
   const [likedBlogs, setLikedBlogs] = useState(() => {
@@ -14,38 +17,57 @@ function Blogs() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [alertShown, setAlertShown] = useState(false);
 
-  // Static blogs
-  const staticBlogs = [
-    { id: 's1', title: 'The Rise of AI', content: 'Artificial Intelligence is shaping the future in unexpected ways.' },
-    { id: 's2', title: 'Healthy Eating Tips', content: 'Maintain a balanced diet without giving up your favorites.' },
-    { id: 's3', title: 'Travel Guide: Japan', content: 'Tokyo’s neon streets to Kyoto’s tranquil temples.' },
-    { id: 's4', title: 'Mastering React', content: 'Best practices for modern, scalable web apps.' },
-    { id: 's5', title: 'Financial Freedom 101', content: 'Budgeting and investing strategies for beginners.' },
-    { id: 's6', title: 'The Science of Sleep', content: 'Why quality rest is vital for productivity.' },
-    { id: 's7', title: 'Fitness Myths Busted', content: 'Separating fact from fiction in fitness.' },
-    { id: 's8', title: 'History’s Greatest Inventions', content: 'From the wheel to the internet.' },
-    { id: 's9', title: 'Minimalism Lifestyle', content: 'Declutter your space and mind.' },
-    { id: 's10', title: 'Space Exploration Updates', content: 'Latest missions and discoveries.' }
-  ];
+  // Function to get CSRF token from cookie
+  const getCsrfTokenFromCookie = () => {
+    const name = 'XSRF-TOKEN=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) === 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return '';
+  };
+
+  // Fetch CSRF token
+  const fetchCsrfToken = async () => {
+    try {
+      await axios.get('http://localhost:8080/api/csrf', { withCredentials: true });
+    } catch (err) {
+      console.log('Error fetching CSRF token:', err);
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8080/blogs', { withCredentials: true })
-      .then((res) => {
-        if (res.data.success) {
-          setBlogs([...staticBlogs, ...res.data.data]);
-          setIsAuthenticated(true);
-        } else {
+    const initializeComponent = async () => {
+      // Fetch CSRF token first
+      await fetchCsrfToken();
+      
+      // Then fetch blogs
+      axios
+        .get('http://localhost:8080/blogs', { withCredentials: true })
+        .then((res) => {
+          if (res.data.success) {
+            setBlogs(res.data.data);
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+          }
+          setAuthChecked(true);
+        })
+        .catch((err) => {
+          console.error('Error fetching blogs:', err);
           setIsAuthenticated(false);
-        }
-        setAuthChecked(true);
-      })
-      .catch((err) => {
-        console.error('Error fetching blogs:', err);
-        setBlogs(staticBlogs); 
-        setIsAuthenticated(false);
-        setAuthChecked(true);
-      });
+          setAuthChecked(true);
+        });
+    };
+
+    initializeComponent();
   }, []);
 
   useEffect(() => {
@@ -55,16 +77,41 @@ function Blogs() {
     }
   }, [authChecked, isAuthenticated, alertShown]);
 
+  // Save liked blogs to localStorage
   useEffect(() => {
     localStorage.setItem('likedBlogs', JSON.stringify(likedBlogs));
   }, [likedBlogs]);
 
-  const toggleLike = (id) => {
-    setLikedBlogs((prev) =>
-      prev.includes(id)
-        ? prev.filter((blogId) => blogId !== id)
-        : [...prev, id]
-    );
+  const toggleLike = async (id) => {
+    try {
+      const token = getCsrfTokenFromCookie();
+      
+      // If you have a like endpoint on your backend, uncomment and modify this:
+      /*
+      await axios.post(`http://localhost:8080/blogs/${id}/like`, {}, {
+        withCredentials: true,
+        headers: {
+          'X-XSRF-TOKEN': token
+        }
+      });
+      */
+      
+      // For now, just update local state
+      setLikedBlogs((prev) =>
+        prev.includes(id)
+          ? prev.filter((blogId) => blogId !== id)
+          : [...prev, id]
+      );
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      if (err.response?.status === 403) {
+        // CSRF token might be expired, try to refresh it
+        await fetchCsrfToken();
+        setError('Session expired. Please refresh the page and try again.');
+      } else {
+        setError('Failed to update like status. Please try again.');
+      }
+    }
   };
 
   const truncate = (str, maxLen) =>
@@ -83,20 +130,19 @@ function Blogs() {
   return (
     <div className="container mt-5">
       <h2 className="mb-4 professional-heading text-center">Featured Blogs</h2>
+      {error && (
+        <div className="alert alert-danger mb-3">
+          {error}
+        </div>
+      )}
       <div className="blog-list">
         {blogs.map((blog) => (
           <div
-            className="blog-item mb-4 shadow-sm rounded bg-white"
+            className="blog-item d-flex flex-md-row flex-column align-items-start mb-4 p-4 shadow-sm rounded bg-white"
             key={blog.id}
           >
-            {/* Blog Title Header */}
-           <div className="blog-header p-3 rounded-top">
-
-              <h4 className="m-0">{truncate(blog.title, 50)}</h4>
-            </div>
-
-            {/* Blog Content */}
-            <div className="p-4">
+            <div className="flex-grow-1">
+              <h4 className="blog-title mb-2">{truncate(blog.title, 50)}</h4>
               <p className="blog-body mb-3 text-muted">
                 {truncate(blog.content || blog.body, 120)}
               </p>
